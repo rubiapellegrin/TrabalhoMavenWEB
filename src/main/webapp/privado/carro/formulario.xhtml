@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <p:dialog header="Edição" widgetVar="dlg" resizable="false"
+              modal="true" width="50%" height="100%">
+        <h:form id="formEdicao" prependId="false">
+            <p:growl id="growl"/>
+            <p:tabView id="tab">
+                <p:tab title="Dados Principais">
+                    <div align="center">
+                        <p:panelGrid columns="2">
+                            <p:outputLabel value="ID"/>
+                            <p:inputText validator="#{controleCarro.objeto.id}"
+                                         size="5" readonly="true"/>
+                            <p:outputLabel value="Placa" for="txtPlaca"/>
+                            <p:inputText id="txtPlaca" value="#{controleCarro.objeto.placa}"
+                                         size="50" maxlength="50"
+                                         placeholder="Obrigatorio"/>
+                            <p:outputLabel value="Renavam" for="txtRenavam"/>
+                            <p:inputText id="txtRenavam" value="#{controleCarro.objeto.renavam}"
+                                         size="50" maxlength="50"
+                                         placeholder="Obrigatorio"/>    
+                            <p:outputLabel value="Modelo" for="txtModelo"/>
+                            <p:inputText id="txtModelo" value="#{controleCarro.objeto.modelo}"
+                                         size="50" maxlength="50"
+                                         placeholder="Obrigatorio"/>
+                            <p:outputLabel value="Fabricante" for="txtFabricante"/>
+                            <p:inputText id="txtFabricante" value="#{controleCarro.objeto.fabricante}"
+                                         size="50" maxlength="50"
+                                         placeholder="Obrigatorio"/>
+                            <p:outputLabel value="Ano de fabricação" for="txtAnoFab"/>
+                            <p:inputText id="txtAnoFab" value="#{controleCarro.objeto.anoFabricaco}"
+                                         size="5" maxlength="5"
+                                         placeholder="Obrigatorio"/>
+                            <p:outputLabel value="Ano do modelo" for="txtAnoMod"/>
+                            <p:inputText id="txtAnoMod" value="#{controleCarro.objeto.anoModelo}"
+                                         size="5" maxlength="5"
+                                         placeholder="Obrigatorio"/>
+                            <p:outputLabel value="Pessoa" for="selectPessoa"/>
+                            <p:selectOneMenu id="selectPessoa" value="#{controleCarro.objeto.pessoa}"
+                                             filter="true" filterMatchMode="startsWith">
+                                <f:selectItem noSelectionOption="true" itemLabel="Selecione um registro"/>
+                                <f:converter binding="#{converterPessoa}"/>
+                                <f:selectItems value="#{controleCarro.daoPessoa.listaTodos}"
+                                               var="pes" itemLabel="#{pes.nome}"/>
+                            </p:selectOneMenu>    
+
+                        </p:panelGrid>
+
+                    </div>
+                </p:tab> 
+                <p:tab title="Acessorios">
+                    <p:dataTable value="#{controleCarro.objeto.acessorios}"
+                                 var="acessorios" rowIndexVar="idxAcessorios"
+                                 id="listaAcessorios">
+                        <f:facet name="header">
+                            <p:panelGrid columns="3">
+                                <p:outputLabel value="Acessorio"/>
+                                <p:selectOneMenu value="#{controleCarro.acessorio}"
+                                                 id="selectAcessorios">
+                                    <f:converter binding="#{converterAcessorios}"/>
+                                    <f:selectItem noSelectionOption="true"
+                                                  itemLabel="Selecione um registro:"/>
+                                    <f:selectItems value="#{controleCarro.daoAcessorios.listaTodos}"
+                                                   var="p" itemLabel="#{p.descricao}"/>
+                                </p:selectOneMenu>
+                                <p:commandButton value="Adicionar"
+                                                 actionListener="#{controleCarro.adicionarAcessorio()}"
+                                                 update="listaAcessorios growl"
+                                                 process="@this selectAcessorios"
+                                                 icon="pi pi-plus"/>
+                            </p:panelGrid>
+                        </f:facet>
+
+                        <p:column headerText="ID" >
+                            <p:outputLabel value="#{acessorios.id}"/>
+                        </p:column>
+                        <p:column headerText="Descricao" >
+                            <p:outputLabel value="#{acessorios.descricao}"/>
+                        </p:column>
+                        <p:column headerText="Ações">
+                            <div align="center">
+                                <p:commandButton 
+                                    actionListener="#{controleCarro.removerAcessorio(acessorios)}"
+                                    icon="pi pi-trash"
+                                    update="listaAcessorios growl"
+                                    process="@this"
+                                    title="Remover acessorio"
+                                    onclick="if (!confirm('Confirma a exclusão'))
+                                                return false"/>
+                            </div>
+                        </p:column>                        
+                    </p:dataTable>
+
+                </p:tab>
+            </p:tabView>
+
+            <p:panel>
+                <div align="center">
+                    <p:commandButton value="Salvar"
+                                     icon="pi pi-save"
+                                     actionListener="#{controleCarro.salvar()}"
+                                     update="formEdicao formListagem"
+                                     oncomplete="if(!args.validationFailed){PF('dlg').hide();}"/> 
+                </div>
+            </p:panel>  
+        </h:form>   
+    </p:dialog>
+
+
+</html>
+

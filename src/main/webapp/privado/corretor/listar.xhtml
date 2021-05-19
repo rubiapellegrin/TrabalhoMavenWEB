@@ -1,0 +1,176 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:composition template="/templates/template.xhtml">
+        <ui:define name="titulo"> Manutenção de cadastro dos corretores</ui:define>
+        <ui:define name="conteudo">
+            <h:form id="formListagem" prependId="false">
+                <p:growl/>
+                <p:commandButton value="Novo" actionListener="#{controleCorretor.novo()}"
+                                 icon="pi pi-plus"
+                                 update="formEdicao"
+                                 process="@this"
+                                 oncomplete="PF('dlg').show();"/>
+                <p:commandButton value="Imprimir"
+                                 icon="pi pi-print"
+                                 action="#{controleCorretor.imprimeCorretores()}"
+                                 ajax="false"
+                                 onclick="this.form.target = '_blank';"/>
+                <div align="center">
+                    <p:panelGrid columns="11">
+                        <p:outputLabel value="Ordem:"/>
+                        <p:selectOneMenu value="#{controleCorretor.dao.ordemAtual}"
+                                         converter="#{controleCorretor.dao.converterOrdem}">
+                            <f:selectItems value="#{controleCorretor.dao.listaOrdem}"
+                                           var="ord" itemValue="#{ord.atributo}"/>
+                            <p:ajax update="listagem"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel value="Filtro:"/>
+                        <p:inputText value="#{controleCorretor.dao.filtro}">
+
+                        </p:inputText>
+                        <p:commandButton value="Filtrar" update="listagem"/>
+                        <p:outputLabel value="Máximo de objetos"/>
+                        <p:selectOneMenu value="#{controleCorretor.dao.maximoObjetos}">
+                            <f:selectItem itemValue="3" itemLabel="3"/>
+                            <f:selectItem itemValue="5" itemLabel="5"/>
+                            <f:selectItem itemValue="10" itemLabel="10"/>
+                            <f:selectItem itemValue="20" itemLabel="20"/>
+                            <f:selectItem itemValue="50" itemLabel="50"/>
+                            <p:ajax update="listagem"/>
+                        </p:selectOneMenu>
+                        <p:commandButton action="#{controleCorretor.dao.primeiro()}"
+                                         title="Primeiro" update="listagem"
+                                         icon="pi pi-step-backward"/>
+                        <p:commandButton action="#{controleCorretor.dao.anterior()}"
+                                         title="Anterior" update="listagem"
+                                         icon="pi pi-chevron-left"/>  
+                        <p:commandButton action="#{controleCorretor.dao.proximo()}"
+                                         title="Proximo" update="listagem"
+                                         icon="pi pi-chevron-right"/>                         
+                        <p:commandButton action="#{controleCorretor.dao.ultimo()}"
+                                         title="Ultimo" update="listagem"
+                                         icon="pi pi-step-forward"/>                        
+                    </p:panelGrid>
+                </div>   
+
+                <p:dataTable value="#{controleCorretor.dao.listaObjetos}" var="obj"
+                             id="listagem">
+
+                    <p:column headerText="ID">
+                        <p:outputLabel value="#{obj.id}"/>
+                    </p:column>
+                    <p:column headerText="Nome">
+                        <p:outputLabel value="#{obj.nome}"/>
+                    </p:column>
+                    <p:column headerText="CPF">
+                        <p:outputLabel value="#{obj.cpf}"/>
+                    </p:column>
+                    <p:column headerText="RG">
+                        <p:outputLabel value="#{obj.rg}"/>
+                    </p:column>
+                    <p:column headerText="Email">
+                        <p:outputLabel value="#{obj.email}"/>
+                    </p:column>
+                    <p:column headerText="Telefone">
+                        <p:outputLabel value="#{obj.telefone}"/>
+                    </p:column>
+                    <p:column headerText="Percentual de comissão">
+                        <p:outputLabel value="#{obj.percentualComissao}"/>
+                    </p:column>
+                    <p:column headerText="Nome de usuario">
+                        <p:outputLabel value="#{obj.nomeUsuario}"/>
+                    </p:column>
+                    <p:column headerText="Senha">
+                        <p:outputLabel value="#{obj.senha}"/>
+                    </p:column>
+                    <p:column headerText="Ações">
+                        <div align="center">
+                            <p:commandButton actionListener="#{controleCorretor.alterar(obj.id)}"
+                                             icon="pi pi-pencil"
+                                             title="Editar"
+                                             update="formEdicao"
+                                             process="@this"
+                                             oncomplete="PF('dlg').show();"/>
+                            <p:commandButton actionListener="#{controleCorretor.excluir(obj.id)}"
+                                             icon="pi pi-trash"
+                                             title="Excluir"
+                                             update="@form"
+                                             process="@this"
+                                             rendered="#{p:ifGranted('ADMINISTRADOR')}"
+                                             onclick="if (!confirm('Confirma a exclusão'))
+                                                         return false"/>
+                            <p:commandButton title="Imprimir"
+                                             icon="pi pi-print"
+                                             action="#{controleCorretor.imprimeCorretor(obj.id)}"
+                                             ajax="false"
+                                             onclick="this.form.target = '_blank';"/>
+                        </div>
+                    </p:column>
+                </p:dataTable>
+            </h:form>
+
+            <p:dialog header="Edição" widgetVar="dlg" resizable="false"
+                      modal="true" width="50%" height="100%">
+                <h:form id="formEdicao" prependId="false">
+                    <p:growl/>
+                    <div align="center">
+                        <p:panelGrid columns="2">
+                            <p:outputLabel value="ID"/>
+                            <p:inputText validator="#{controleCorretor.objeto.id}"
+                                         size="5" readonly="true"/>
+                            <p:outputLabel value="Nome" for="txtNome"/>
+                            <p:inputText id="txtNome" value="#{controleCorretor.objeto.nome}"
+                                         size="50" maxlength="50"
+                                         placeholder="Obrigatorio"/>
+                            <p:outputLabel value="CPF" for="txtCpf"/>
+                            <p:inputText id="txtCpf" value="#{controleCorretor.objeto.cpf}"
+                                         size="11" maxlength="11"
+                                         placeholder="Obrigatorio"/>    
+                            <p:outputLabel value="RG" for="txtRg"/>
+                            <p:inputText id="txtRg" value="#{controleCorretor.objeto.rg}"
+                                         size="12" maxlength="12"
+                                         placeholder="Obrigatorio"/>
+                            <p:outputLabel value="Email" for="txtEmail"/>
+                            <p:inputText id="txtEmail" value="#{controleCorretor.objeto.email}"
+                                         size="50" maxlength="50"
+                                         placeholder="Obrigatorio"/>
+                            <p:outputLabel value="Telefone" for="txtTelefone"/>
+                            <p:inputText id="txtTelefone" value="#{controleCorretor.objeto.telefone}"
+                                         size="11" maxlength="11"
+                                         placeholder="Obrigatorio"/>
+                            <p:outputLabel value="Percentual" for="txtPercentualComi"/>
+                            <p:inputText id="txtPercentualComi" value="#{controleCorretor.objeto.percentualComissao}"
+                                         size="50" maxlength="50"
+                                         placeholder="Obrigatorio"/>
+                            <p:outputLabel value="Nome de usuario" for="txtNomeUsuario"/>
+                            <p:inputText id="txtNomeUsuario" value="#{controleCorretor.objeto.nomeUsuario}"
+                                         size="50" maxlength="50"
+                                         placeholder="Obrigatorio"/>
+                            <p:outputLabel value="Senha" for="txtSenha"/>
+                            <p:inputText id="txtSenha" value="#{controleCorretor.objeto.senha}"
+                                         size="50" maxlength="50"
+                                         placeholder="Obrigatorio"/> 
+                        </p:panelGrid>
+                    </div>
+                    <p:panel>
+                        <div align="center">
+                            <p:commandButton value="Salvar"
+                                             icon="pi pi-save"
+                                             actionListener="#{controleCorretor.salvar()}"
+                                             update="formEdicao formListagem"
+                                             oncomplete="if(!args.validationFailed){PF('dlg').hide();}"/>
+                            
+                        </div>
+                    </p:panel>  
+                </h:form>   
+            </p:dialog>
+        </ui:define>
+    </ui:composition>
+
+</html>
+
